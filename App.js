@@ -103,7 +103,7 @@ export default function App() {
   if (screen === 'login') return <LoginScreen email={email} password={password} setEmail={setEmail} setPassword={setPassword} onLogin={() => setScreen('home')} onRegister={() => setScreen('register')} onForgot={() => setScreen('forgot')} />;
   if (screen === 'forgot') return <ForgotPasswordScreen initialEmail={email} onBack={() => setScreen('login')} />;
   if (screen === 'register') return <RegisterScreen onBack={() => setScreen('login')} onComplete={() => setScreen('home')} />;
-  if (screen === 'home') return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('room')} openBook={openBook} />;
+  if (screen === 'home') return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
   if (screen === 'search') return <SearchScreen query={query} setQuery={setQuery} results={results} onBack={() => setScreen('home')} onSearch={() => setScreen('results')} />;
   if (screen === 'results') return <ResultsScreen query={query} results={results} onBack={() => setScreen('search')} openBook={openBook} />;
   if (screen === 'bookDetails') return <BookDetailsScreen book={selectedBook} onBack={() => setScreen('results')} onReserve={() => setScreen('reserve')} />;
