@@ -1,3 +1,12 @@
 import React from 'react';
-import { Results } from '../App';
-export default function ResultsScreen(props) { return <Results {...props} />; }
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+export default function ResultsScreen({ query, results, onBack, openBook }) {
+  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.page}>
+    <Pressable onPress={onBack}><Text style={s.back}>‹ Back to search</Text></Pressable>
+    <Text style={s.title}>Search results</Text><Text style={s.sub}>{query ? `Results for “${query}”` : 'Browse all books'}</Text>
+    <View style={s.summary}><Text style={s.count}>{results.length} {results.length === 1 ? 'book' : 'books'} found</Text><Text style={s.sort}>Sort: Relevance ▾</Text></View>
+    {results.length ? results.map((book) => <Pressable key={book.id} onPress={() => openBook(book)} style={s.card}><View style={[s.cover,{backgroundColor:book.color}]}><Text style={s.initial}>{book.title[0]}</Text></View><View style={s.info}><Text numberOfLines={1} style={s.bookTitle}>{book.title}</Text><Text style={s.author}>{book.author}</Text><Text style={s.category}>{book.category}</Text><Text style={[s.status,{color:book.available?'#168253':'#B53C52'}]}>{book.available ? `${book.copies} available` : 'Currently unavailable'}</Text></View><Text style={s.chevron}>›</Text></Pressable>) : <View style={s.empty}><Text style={s.emptyIcon}>⌕</Text><Text style={s.emptyTitle}>No books found</Text><Text style={s.emptyCopy}>Try a title, author name, or ISBN number.</Text></View>}
+  </ScrollView></SafeAreaView>;
+}
+const s=StyleSheet.create({safe:{flex:1,backgroundColor:'#F7F8FC'},page:{padding:20,paddingBottom:44},back:{color:'#304B9B',fontWeight:'800'},title:{fontSize:28,fontWeight:'900',color:'#1D2742',marginTop:24},sub:{color:'#69738D',marginTop:5},summary:{flexDirection:'row',justifyContent:'space-between',marginVertical:22},count:{fontWeight:'900',color:'#1D2742'},sort:{color:'#304B9B',fontWeight:'800',fontSize:13},card:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderRadius:16,padding:12,marginBottom:12,borderWidth:1,borderColor:'#E4E7F0'},cover:{width:62,height:84,borderRadius:10,alignItems:'center',justifyContent:'center'},initial:{fontSize:28,fontWeight:'900',color:'#243561'},info:{flex:1,marginLeft:13},bookTitle:{fontWeight:'900',fontSize:16,color:'#1D2742'},author:{color:'#69738D',marginTop:4},category:{color:'#304B9B',fontSize:12,fontWeight:'800',marginTop:5},status:{fontSize:12,fontWeight:'900',marginTop:7},chevron:{fontSize:30,color:'#8B93A7'},empty:{alignItems:'center',backgroundColor:'#FFF',borderRadius:18,padding:32,marginTop:20},emptyIcon:{fontSize:38,color:'#304B9B'},emptyTitle:{fontSize:18,fontWeight:'900',color:'#1D2742',marginTop:10},emptyCopy:{color:'#69738D',textAlign:'center',marginTop:7} });

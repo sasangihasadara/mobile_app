@@ -1,0 +1,13 @@
+import React, { useState } from 'react';
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+export default function ReserveBookScreen({ book, onBack, onConfirm }) {
+  const [date,setDate]=useState('Tomorrow'); const [time,setTime]=useState('4:00 PM – 6:00 PM');
+  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.page}><View style={s.content}><Pressable onPress={onBack}><Text style={s.back}>‹ Back to book details</Text></Pressable><Text style={s.title}>Reserve book</Text>
+    <View style={s.book}><View style={[s.cover,{backgroundColor:book.color}]}><Text style={s.initial}>{book.title[0]}</Text></View><View><Text style={s.bookTitle}>{book.title}</Text><Text style={s.author}>{book.author}</Text></View></View>
+    <Text style={s.label}>Pickup date</Text><View style={s.options}>{['Today','Tomorrow','Next weekday'].map(x=><Pressable key={x} onPress={()=>setDate(x)} style={[s.option,date===x&&s.active]}><Text style={[s.optionText,date===x&&s.activeText]}>{x}</Text></Pressable>)}</View>
+    <Text style={s.label}>Pickup window</Text><View style={s.options}>{['9–11 AM','12–2 PM','4–6 PM'].map(x=><Pressable key={x} onPress={()=>setTime(x)} style={[s.option,time===x&&s.active]}><Text style={[s.optionText,time===x&&s.activeText]}>{x}</Text></Pressable>)}</View>
+    <Text style={s.note}>Your book will be held at the Main Library desk.</Text><Pressable onPress={onConfirm} style={s.button}><Text style={s.buttonText}>Confirm reservation</Text></Pressable>
+  </View></ScrollView></SafeAreaView>;
+}
+const s=StyleSheet.create({safe:{flex:1,backgroundColor:'#F7F8FC'},page:{flexGrow:1,padding:20,paddingBottom:44},content:{width:'100%',maxWidth:620,alignSelf:'center'},back:{color:'#304B9B',fontWeight:'800'},title:{fontSize:29,fontWeight:'900',color:'#1D2742',marginTop:24},book:{flexDirection:'row',backgroundColor:'#FFF',borderRadius:17,padding:14,marginTop:22,alignItems:'center'},cover:{width:62,height:82,borderRadius:10,alignItems:'center',justifyContent:'center'},initial:{fontSize:28,fontWeight:'900',color:'#243561'},bookTitle:{fontSize:17,fontWeight:'900',color:'#1D2742',marginLeft:14},author:{color:'#69738D',marginLeft:14,marginTop:4},label:{fontWeight:'900',color:'#303A54',marginTop:28,marginBottom:10},options:{flexDirection:'row',flexWrap:'wrap',gap:9},option:{padding:12,borderRadius:12,backgroundColor:'#E9EDF7'},active:{backgroundColor:'#304B9B'},optionText:{fontWeight:'800',color:'#405071'},activeText:{color:'#FFF'},note:{color:'#69738D',lineHeight:21,marginVertical:25},button:{backgroundColor:'#304B9B',borderRadius:14,padding:17,alignItems:'center'},buttonText:{color:'#FFF',fontWeight:'900',fontSize:16}});
