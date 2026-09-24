@@ -10,6 +10,16 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import HomeScreen from './screens/HomeScreen';
+import SearchScreen from './screens/SearchScreen';
+import ResultsScreen from './screens/ResultsScreen';
+import BookDetailsScreen from './screens/BookDetailsScreen';
+import ConfirmationScreen from './screens/ConfirmationScreen';
+import ReservationsScreen from './screens/ReservationsScreen';
+import ReadingRoomScreen from './screens/ReadingRoomScreen';
 
 const books = [
   { id: '1', title: 'Atomic Habits', author: 'James Clear', isbn: '978-0735211292', category: 'Self Development', available: true, copies: 3, color: '#FFD9A0' },
@@ -92,25 +102,30 @@ export default function App() {
     setCatalogue((items) => items.map((item) => item.id === selectedBook.id ? { ...item, available: false, copies: 0 } : item));
     setScreen('confirmation');
   };
+  const cancelReservation = (book) => {
+    setReserved((items) => items.filter((item) => item.id !== book.id));
+    setCatalogue((items) => items.map((item) => item.id === book.id ? { ...item, available: true, copies: Math.max(1, book.copies) } : item));
+    Alert.alert('Reservation cancelled', `${book.title} is available in the catalogue again.`);
+  };
 
-  if (screen === 'welcome') return <Welcome onStart={() => setScreen('login')} onPreview={() => setScreen('preview')} />;
+  if (screen === 'welcome') return <WelcomeScreen onStart={() => setScreen('login')} onPreview={() => setScreen('preview')} />;
   if (screen === 'preview') return <ScreenPreview onBack={() => setScreen('welcome')} onOpen={setScreen} />;
-  if (screen === 'login') return <Login email={email} password={password} setEmail={setEmail} setPassword={setPassword} onLogin={() => setScreen('home')} onRegister={() => setScreen('register')} />;
-  if (screen === 'register') return <Register onBack={() => setScreen('login')} onComplete={() => setScreen('home')} />;
-  if (screen === 'home') return <Home onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('room')} openBook={openBook} />;
-  if (screen === 'search') return <Search query={query} setQuery={setQuery} results={results} onBack={() => setScreen('home')} onSearch={() => setScreen('results')} />;
-  if (screen === 'results') return <Results query={query} results={results} onBack={() => setScreen('search')} openBook={openBook} />;
-  if (screen === 'bookDetails') return <BookDetails book={selectedBook} onBack={() => setScreen('results')} onReserve={reserveBook} />;
-  if (screen === 'confirmation') return <Confirmation book={selectedBook} onHome={() => setScreen('home')} onReservations={() => setScreen('reservations')} />;
-  if (screen === 'reservations') return <Reservations items={reserved} onBack={() => setScreen('home')} onSearch={() => setScreen('search')} />;
-  return <ReadingRoom selected={selectedRoom} setSelected={setSelectedRoom} onBack={() => setScreen('home')} />;
+  if (screen === 'login') return <LoginScreen email={email} password={password} setEmail={setEmail} setPassword={setPassword} onLogin={() => setScreen('home')} onRegister={() => setScreen('register')} />;
+  if (screen === 'register') return <RegisterScreen onBack={() => setScreen('login')} onComplete={() => setScreen('home')} />;
+  if (screen === 'home') return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('room')} openBook={openBook} />;
+  if (screen === 'search') return <SearchScreen query={query} setQuery={setQuery} results={results} onBack={() => setScreen('home')} onSearch={() => setScreen('results')} />;
+  if (screen === 'results') return <ResultsScreen query={query} results={results} onBack={() => setScreen('search')} openBook={openBook} />;
+  if (screen === 'bookDetails') return <BookDetailsScreen book={selectedBook} onBack={() => setScreen('results')} onReserve={reserveBook} />;
+  if (screen === 'confirmation') return <ConfirmationScreen book={selectedBook} onHome={() => setScreen('home')} onReservations={() => setScreen('reservations')} />;
+  if (screen === 'reservations') return <ReservationsScreen items={reserved} onBack={() => setScreen('home')} onSearch={() => setScreen('search')} onCancel={cancelReservation} />;
+  return <ReadingRoomScreen selected={selectedRoom} setSelected={setSelectedRoom} onBack={() => setScreen('home')} />;
 }
 
 function Page({ children }) {
   return <SafeAreaView style={styles.safe}><StatusBar barStyle="dark-content" /><ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>{children}</ScrollView></SafeAreaView>;
 }
 
-function Welcome({ onStart, onPreview }) {
+export function Welcome({ onStart, onPreview }) {
   return <SafeAreaView style={styles.welcomeSafe}><StatusBar barStyle="light-content" /><View style={styles.welcome}>
     <View style={styles.welcomeLogo}><Text style={styles.welcomeLogoText}>L</Text></View>
     <Text style={styles.welcomeTitle}>LibraReserve</Text>
@@ -141,7 +156,7 @@ function ScreenPreview({ onBack, onOpen }) {
   </Page>;
 }
 
-function Login({ email, password, setEmail, setPassword, onLogin, onRegister }) {
+export function Login({ email, password, setEmail, setPassword, onLogin, onRegister }) {
   const submit = () => {
     if (!email.includes('@') || password.length < 6) return Alert.alert('Check your details', 'Enter a valid email and a password with at least 6 characters.');
     onLogin();
@@ -155,7 +170,7 @@ function Login({ email, password, setEmail, setPassword, onLogin, onRegister }) 
   </Page>;
 }
 
-function Register({ onBack, onComplete }) {
+export function Register({ onBack, onComplete }) {
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   return <Page><Header title="Create account" back onBack={onBack} /><Text style={styles.screenLead}>Create your library account in less than a minute.</Text>
@@ -166,7 +181,7 @@ function Register({ onBack, onComplete }) {
   </Page>;
 }
 
-function Home({ onSearch, onReservations, onRoom, openBook }) {
+export function Home({ catalogue, onSearch, onReservations, onRoom, openBook }) {
   return <Page><Header title="Good morning, Anya" subtitle="What would you like to do today?" />
     <Pressable onPress={onSearch} style={styles.searchBar}><Text style={styles.searchIcon}>⌕</Text><Text style={styles.searchPlaceholder}>Search title, author or ISBN</Text></Pressable>
     <Text style={styles.sectionTitle}>Quick actions</Text><View style={styles.actionGrid}>
@@ -174,11 +189,11 @@ function Home({ onSearch, onReservations, onRoom, openBook }) {
       <Pressable onPress={onReservations} style={[styles.actionCard, styles.actionGold]}><Text style={styles.actionEmoji}>▣</Text><Text style={styles.actionTitle}>My reservations</Text><Text style={styles.actionCopy}>Track your pickups</Text></Pressable>
       <Pressable onPress={onRoom} style={[styles.actionCard, styles.actionBlue]}><Text style={styles.actionEmoji}>⌂</Text><Text style={styles.actionTitle}>Reading rooms</Text><Text style={styles.actionCopy}>Book a study space</Text></Pressable>
     </View>
-    <Text style={styles.sectionTitle}>Popular this week</Text>{books.slice(0, 2).map((book) => <BookRow key={book.id} book={book} onPress={() => openBook(book)} />)}
+    <Text style={styles.sectionTitle}>Popular this week</Text>{catalogue.slice(0, 2).map((book) => <BookRow key={book.id} book={book} onPress={() => openBook(book)} />)}
   </Page>;
 }
 
-function Search({ query, setQuery, results, onBack, onSearch }) {
+export function Search({ query, setQuery, results, onBack, onSearch }) {
   return <Page><Header title="Search books" subtitle="Search by title, author or ISBN" back onBack={onBack} />
     <View style={styles.searchInputWrap}><Text style={styles.searchIcon}>⌕</Text><TextInput accessibilityLabel="Search books" autoFocus value={query} onChangeText={setQuery} onSubmitEditing={onSearch} placeholder="Try “Atomic Habits”" placeholderTextColor="#8B93A7" style={styles.searchInput} returnKeyType="search" /></View>
     <Text style={styles.helper}>Results update as you type. Availability is live.</Text>
@@ -188,14 +203,14 @@ function Search({ query, setQuery, results, onBack, onSearch }) {
   </Page>;
 }
 
-function Results({ query, results, onBack, openBook }) {
+export function Results({ query, results, onBack, openBook }) {
   return <Page><Header title="Search results" subtitle={query ? `Results for “${query}”` : 'Browse all books'} back onBack={onBack} />
     <View style={styles.resultSummary}><Text style={styles.resultCount}>{results.length} {results.length === 1 ? 'book' : 'books'} found</Text><Text style={styles.sortText}>Sort: Relevance ▾</Text></View>
     {results.length ? results.map((book) => <BookRow key={book.id} book={book} onPress={() => openBook(book)} />) : <View style={styles.empty}><Text style={styles.emptyEmoji}>⌕</Text><Text style={styles.emptyTitle}>No books found</Text><Text style={styles.emptyCopy}>Try the book title, author name, or ISBN number.</Text></View>}
   </Page>;
 }
 
-function BookDetails({ book, onBack, onReserve }) {
+export function BookDetails({ book, onBack, onReserve }) {
   return <Page><Header title="Book details" back onBack={onBack} /><View style={styles.detailHero}><BookCover book={book} large /><View style={styles.detailText}><Text style={styles.detailTitle}>{book.title}</Text><Text style={styles.detailAuthor}>by {book.author}</Text><Text style={styles.bookCategory}>{book.category}</Text><Availability book={book} /></View></View>
     <View style={styles.detailCard}><DetailRow label="ISBN" value={book.isbn} /><DetailRow label="Shelf" value="Level 2 · A-14" /><DetailRow label="Loan period" value="14 days" /><DetailRow label="Pickup point" value="Main library desk" /></View>
     <Text style={styles.description}>A well-loved title selected by students. Reserve an available copy now and collect it from the main library desk.</Text>
@@ -205,20 +220,21 @@ function BookDetails({ book, onBack, onReserve }) {
 
 function DetailRow({ label, value }) { return <View style={styles.detailRow}><Text style={styles.detailLabel}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>; }
 
-function Confirmation({ book, onHome, onReservations }) {
+export function Confirmation({ book, onHome, onReservations }) {
   return <Page><View style={styles.confirm}><View style={styles.successCircle}><Text style={styles.successMark}>✓</Text></View><Text style={styles.confirmTitle}>Book reserved!</Text><Text style={styles.confirmCopy}>Your copy of <Text style={styles.bold}>{book.title}</Text> will be held until 6:00 PM tomorrow.</Text></View>
     <View style={styles.ticket}><Text style={styles.ticketLabel}>PICKUP CODE</Text><Text style={styles.ticketCode}>LB-{book.id}724</Text><View style={styles.ticketLine} /><Text style={styles.ticketText}>Main Library · Ground floor desk</Text><Text style={styles.ticketText}>Bring your student ID when collecting.</Text></View>
     <AppButton title="View my reservations" onPress={onReservations} /><AppButton title="Back to home" secondary onPress={onHome} />
   </Page>;
 }
 
-function Reservations({ items, onBack, onSearch }) {
+export function Reservations({ items, onBack, onSearch, onCancel }) {
   return <Page><Header title="My reservations" subtitle="Manage your book pickups" back onBack={onBack} />
     {items.length ? items.map((book) => <View key={book.id} style={styles.reservationCard}><BookCover book={book} /><View style={styles.bookInfo}><Text style={styles.bookTitle}>{book.title}</Text><Text style={styles.bookAuthor}>Pickup by tomorrow, 6:00 PM</Text><Text style={styles.pickup}>Ready for pickup</Text></View></View>) : <View style={styles.empty}><Text style={styles.emptyEmoji}>▣</Text><Text style={styles.emptyTitle}>No reservations yet</Text><Text style={styles.emptyCopy}>Search the catalogue and reserve an available book.</Text><AppButton title="Search books" onPress={onSearch} /></View>}
+    {items.length ? <AppButton title="Cancel all reservations" secondary onPress={() => items.forEach(onCancel)} /> : null}
   </Page>;
 }
 
-function ReadingRoom({ selected, setSelected, onBack }) {
+export function ReadingRoom({ selected, setSelected, onBack }) {
   const [time, setTime] = useState('10:00 AM – 12:00 PM');
   return <Page><Header title="Reading rooms" subtitle="Reserve your study space" back onBack={onBack} /><Text style={styles.sectionTitle}>Choose a room</Text>
     {rooms.map((room) => <Pressable key={room} onPress={() => setSelected(room)} style={[styles.roomCard, selected === room && styles.roomSelected]}><Text style={styles.roomIcon}>⌂</Text><View style={styles.bookInfo}><Text style={styles.bookTitle}>{room}</Text><Text style={styles.bookAuthor}>{room === rooms[0] ? '1–2 people · Silent' : room === rooms[1] ? '3–6 people · Whiteboard' : 'Computers · E-resources'}</Text></View><Text style={styles.radio}>{selected === room ? '●' : '○'}</Text></Pressable>)}
