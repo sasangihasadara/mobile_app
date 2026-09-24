@@ -1,0 +1,11 @@
+# Dependencies and Expo's local cache are regenerated locally.
+node_modules/
+.expo/
+
+# Local Android installer package; do not commit large binaries.
+Expo-Go-*.apk
+
+# Editor and operating-system files.
+.vscode/
+.DS_Store
+node_modules
