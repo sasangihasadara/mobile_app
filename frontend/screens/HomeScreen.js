@@ -1,9 +1,10 @@
 import React from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function HomeScreen({ catalogue, onSearch, onReservations, onRoom, openBook }) {
+export default function HomeScreen({ catalogue, onSearch, onReservations, onRoom, openBook, user, onLogout, busy }) {
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.page}>
-    <View style={s.top}><View><Text style={s.greeting}>Good morning, Anya</Text><Text style={s.sub}>Your library is ready for you.</Text></View><View style={s.avatar}><Text style={s.avatarText}>AS</Text></View></View>
+    <View style={s.top}><View><Text style={s.greeting}>Welcome, {user?.name || 'reader'}</Text><Text style={s.sub}>Your library is ready for you.</Text></View><View style={s.avatar}><Text style={s.avatarText}>{user?.name?.slice(0,2).toUpperCase() || 'L'}</Text></View></View>
+    {user && <Pressable disabled={busy} onPress={onLogout}><Text style={s.availability}>Sign out</Text></Pressable>}
     <Pressable onPress={onSearch} style={s.search}><Text style={s.searchIcon}>⌕</Text><Text style={s.searchText}>Search title, author or ISBN</Text></Pressable>
     <Text style={s.heading}>Quick actions</Text><View style={s.grid}>
       <Action icon="⌕" title="Search books" copy="Find what you need" color="#E5E4FF" onPress={onSearch} />

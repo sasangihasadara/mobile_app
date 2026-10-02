@@ -9,3 +9,9 @@ Expo-Go-*.apk
 .vscode/
 .DS_Store
 node_modules
+
+# Local backend database and machine configuration
+backend/data/
+.env
+.env.local
+dist/

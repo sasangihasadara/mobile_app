@@ -1,10 +1,10 @@
 import React from 'react';
 import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-export default function LoginScreen({ email, password, setEmail, setPassword, onLogin, onRegister, onForgot }) {
+export default function LoginScreen({ email, password, setEmail, setPassword, onLogin, onRegister, onForgot, busy }) {
   const signIn = () => {
-    if (!email.trim().includes('@') || password.length < 6) {
-      Alert.alert('Check your details', 'Enter a valid university email and a password with at least 6 characters.');
+    if (!email.trim().includes('@') || password.length < 8) {
+      Alert.alert('Check your details', 'Enter a valid university email and a password with at least 8 characters.');
       return;
     }
     onLogin();
@@ -19,7 +19,7 @@ export default function LoginScreen({ email, password, setEmail, setPassword, on
     <Text style={s.label}>Password</Text>
     <TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="Enter your password" placeholderTextColor="#8B93A7" style={s.input} />
     <Pressable onPress={onForgot}><Text style={s.forgot}>Forgot password?</Text></Pressable>
-    <Pressable onPress={signIn} style={s.primary}><Text style={s.primaryText}>Sign in</Text></Pressable>
+    <Pressable disabled={busy} onPress={signIn} style={s.primary}><Text style={s.primaryText}>{busy ? 'Signing in...' : 'Sign in'}</Text></Pressable>
     <Text style={s.or}>OR</Text>
     <Pressable onPress={() => Alert.alert('Campus account', 'University SSO can be connected here.')} style={s.secondary}><Text style={s.secondaryText}>Continue with campus account</Text></Pressable>
     <Text style={s.footer}>New here? <Text onPress={onRegister} style={s.link}>Create an account</Text></Text>

@@ -4,7 +4,7 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'rea
 export default function ConfirmationScreen({ book, onHome, onReservations }) {
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.page}>
     <View style={s.success}><View style={s.tick}><Text style={s.tickText}>✓</Text></View><Text style={s.title}>Book reserved!</Text><Text style={s.copy}>Your copy of <Text style={s.bold}>{book.title}</Text> is ready to collect.</Text></View>
-    <View style={s.ticket}><Text style={s.ticketLabel}>PICKUP CODE</Text><Text style={s.code}>LB-{book.id}724</Text><View style={s.line}/><Text style={s.ticketText}>Main Library · Ground floor desk</Text><Text style={s.ticketText}>Collect before 6:00 PM tomorrow.</Text><Text style={s.ticketText}>Bring your student ID.</Text></View>
+    <View style={s.ticket}><Text style={s.ticketLabel}>PICKUP CODE</Text><Text style={s.code}>{book.pickupCode || 'Preview'}</Text><View style={s.line}/><Text style={s.ticketText}>Main Library · Ground floor desk</Text><Text style={s.ticketText}>{book.pickupDate} / {book.pickupWindow}</Text><Text style={s.ticketText}>Bring your student ID.</Text></View>
     <Pressable onPress={onReservations} style={s.primary}><Text style={s.primaryText}>View my reservations</Text></Pressable>
     <Pressable onPress={onHome} style={s.secondary}><Text style={s.secondaryText}>Back to home</Text></Pressable>
   </ScrollView></SafeAreaView>;

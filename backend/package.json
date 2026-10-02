@@ -1,0 +1,16 @@
+{
+  "name": "library-reserve-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MongoDB API for the LibraReserve mobile app",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.cjs",
+    "test": "node --test server.test.cjs"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  }
+}

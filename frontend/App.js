@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import { api, setToken } from './services/api';
 import {
   Alert,
   Pressable,
@@ -78,6 +79,10 @@ export default function App() {
   const [reserved, setReserved] = useState([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const working = useRef(false);
+  const [confirmation, setConfirmation] = useState(null);
 
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -85,32 +90,63 @@ export default function App() {
     return catalogue.filter((book) => `${book.title} ${book.author} ${book.isbn} ${book.category}`.toLowerCase().includes(term));
   }, [query, catalogue]);
 
-  const openBook = (book) => { setSelectedBook(book); setScreen('bookDetails'); };
-  const reserveBook = () => {
-    if (!selectedBook.available) return;
-    setReserved((items) => items.some((item) => item.id === selectedBook.id) ? items : [...items, selectedBook]);
-    setCatalogue((items) => items.map((item) => item.id === selectedBook.id ? { ...item, available: false, copies: 0 } : item));
-    setScreen('confirmation');
+  const run = async (task) => {
+    if (working.current) return;
+    working.current = true; setBusy(true);
+    try { await task(); } catch (error) { Alert.alert('Library', error.message); }
+    finally { working.current = false; setBusy(false); }
   };
-  const cancelReservation = (book) => {
-    setReserved((items) => items.filter((item) => item.id !== book.id));
-    setCatalogue((items) => items.map((item) => item.id === book.id ? { ...item, available: true, copies: Math.max(1, book.copies) } : item));
-    Alert.alert('Reservation cancelled', `${book.title} is available in the catalogue again.`);
+  const refresh = async () => {
+    const [catalog, mine] = await Promise.all([api('/books'), api('/reservations')]);
+    setCatalogue(catalog.books); setReserved(mine.reservations);
   };
+  const authenticate = (route, details) => run(async () => {
+    const data = await api('/auth/' + route, 'POST', details);
+    setToken(data.token); setUser(data.user); setPassword('');
+    await refresh(); setScreen('home');
+  });
+  const logout = () => run(async () => {
+    await api('/auth/logout', 'POST');
+    setToken(null); setUser(null); setReserved([]); setScreen('login');
+  });
+  const showReservations = () => {
+    if (!user) { setScreen('login'); return; }
+    run(async () => { await refresh(); setScreen('reservations'); });
+  };
+  const openBook = (book) => run(async () => {
+    const data = await api('/books'); setCatalogue(data.books);
+    setSelectedBook(data.books.find(item => item.id === book.id) || book); setScreen('bookDetails');
+  });
+  const reserveBook = (pickup) => {
+    if (!user) { setScreen('login'); return; }
+    run(async () => {
+      const data = await api('/reservations', 'POST', { bookId: selectedBook.id, ...pickup });
+      setCatalogue(data.books); setReserved(data.reservations); setConfirmation(data.reservation);
+      setScreen('confirmation');
+    });
+  };
+  const cancelReservation = (book) => run(async () => {
+    const data = await api('/reservations/' + book.reservationId, 'DELETE');
+    setCatalogue(data.books); setReserved(data.reservations);
+  });
+  const cancelAll = () => run(async () => {
+    try { for (const book of reserved) await api('/reservations/' + book.reservationId, 'DELETE'); }
+    finally { await refresh(); }
+  });
 
   if (screen === 'welcome') return <WelcomeScreen onStart={() => setScreen('login')} onPreview={() => setScreen('preview')} />;
   if (screen === 'preview') return <ScreenPreview onBack={() => setScreen('welcome')} onOpen={setScreen} />;
-  if (screen === 'login') return <LoginScreen email={email} password={password} setEmail={setEmail} setPassword={setPassword} onLogin={() => setScreen('home')} onRegister={() => setScreen('register')} onForgot={() => setScreen('forgot')} />;
+  if (screen === 'login') return <LoginScreen busy={busy} email={email} password={password} setEmail={setEmail} setPassword={setPassword} onLogin={() => authenticate('login', { email, password })} onRegister={() => setScreen('register')} onForgot={() => setScreen('forgot')} />;
   if (screen === 'forgot') return <ForgotPasswordScreen initialEmail={email} onBack={() => setScreen('login')} />;
-  if (screen === 'register') return <RegisterScreen onBack={() => setScreen('login')} onComplete={() => setScreen('home')} />;
-  if (screen === 'home') return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
+  if (screen === 'register') return <RegisterScreen busy={busy} onBack={() => setScreen('login')} onComplete={(details) => authenticate('register', details)} />;
+  if (screen === 'home') return <HomeScreen user={user} busy={busy} onLogout={logout} catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={showReservations} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
   if (screen === 'search') return <SearchScreen query={query} setQuery={setQuery} results={results} onBack={() => setScreen('home')} onSearch={() => setScreen('results')} />;
   if (screen === 'results') return <ResultsScreen query={query} results={results} onBack={() => setScreen('search')} openBook={openBook} />;
   if (screen === 'bookDetails') return <BookDetailsScreen book={selectedBook} onBack={() => setScreen('results')} onReserve={() => setScreen('reserve')} />;
   if (screen === 'shelfMap') return <ShelfMapScreen book={selectedBook} onBack={() => setScreen('bookDetails')} />;
-  if (screen === 'reserve') return <ReserveBookScreen book={selectedBook} onBack={() => setScreen('bookDetails')} onConfirm={reserveBook} />;
-  if (screen === 'confirmation') return <ConfirmationScreen book={selectedBook} onHome={() => setScreen('home')} onReservations={() => setScreen('reservations')} />;
-  if (screen === 'reservations') return <ReservationsScreen items={reserved} onBack={() => setScreen('home')} onSearch={() => setScreen('search')} onCancel={cancelReservation} />;
+  if (screen === 'reserve') return <ReserveBookScreen busy={busy} book={selectedBook} onBack={() => setScreen('bookDetails')} onConfirm={reserveBook} />;
+  if (screen === 'confirmation') return <ConfirmationScreen book={confirmation || selectedBook} onHome={() => setScreen('home')} onReservations={showReservations} />;
+  if (screen === 'reservations') return <ReservationsScreen busy={busy} onCancelAll={cancelAll} items={reserved} onBack={() => setScreen('home')} onSearch={() => setScreen('search')} onCancel={cancelReservation} />;
   return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
 }
 
