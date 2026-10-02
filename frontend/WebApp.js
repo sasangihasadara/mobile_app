@@ -77,6 +77,62 @@ function AuthPanel({ mode, setMode, busy, email, password, setEmail, setPassword
   </View>;
 }
 
+function InstitutionalAuthPanel({ mode, setMode, busy, email, password, setEmail, setPassword, authenticate }) {
+  const [name, setName] = useState('');
+  const [studentId, setStudentId] = useState('');
+  const submit = () => {
+    if (mode === 'forgot') return Alert.alert('Password recovery', 'Contact the library administrator to reset your password.');
+    if (!email.trim().includes('@') || password.length < 8) return Alert.alert('Check details', 'Use a valid email and a password with at least 8 characters.');
+    if (mode === 'register') {
+      if (!name.trim() || !studentId.trim()) return Alert.alert('Almost there', 'Enter your full name and student ID.');
+      authenticate('register', { name, studentId, email, password });
+      return;
+    }
+    authenticate('login', { email, password });
+  };
+
+  return <View style={s.authShell}>
+    <View style={s.authHeroClean}>
+      <View style={s.heroContent}>
+        <View style={s.portalTop}>
+          <View style={s.brandMark}><Text style={s.brandMarkText}>L</Text></View>
+          <View><Text style={s.portalLabel}>University Library Services</Text><Text style={s.portalSub}>Student and staff access portal</Text></View>
+        </View>
+        <Text style={s.heroTitle}>LibraReserve</Text>
+        <Text style={s.heroCopy}>Access library reservations, borrowing activity, and reading-room services through a protected university account.</Text>
+        <View style={s.serviceGrid}>
+          <View style={s.serviceCard}><Text style={s.serviceKicker}>Catalogue</Text><Text style={s.serviceTitle}>Search and reserve books</Text><Text style={s.serviceText}>Find holdings and reserve eligible items after sign in.</Text></View>
+          <View style={s.serviceCard}><Text style={s.serviceKicker}>Reading rooms</Text><Text style={s.serviceTitle}>Manage study access</Text><Text style={s.serviceText}>Check room options and manage reading-room requests.</Text></View>
+          <View style={s.serviceCard}><Text style={s.serviceKicker}>Account</Text><Text style={s.serviceTitle}>Private reservation details</Text><Text style={s.serviceText}>View pickup information only inside your account.</Text></View>
+          <View style={s.serviceCard}><Text style={s.serviceKicker}>Support</Text><Text style={s.serviceTitle}>Library desk assistance</Text><Text style={s.serviceText}>Contact staff if your university login needs help.</Text></View>
+        </View>
+        <View style={s.portalNotice}>
+          <View style={s.noticeColumn}><Text style={s.noticeTitle}>Protected service</Text><Text style={s.noticeText}>Catalogue availability, pickup codes, reservation history, and student details are shown only after authentication.</Text></View>
+          <View style={s.noticeDivider} />
+          <View style={s.noticeColumn}><Text style={s.noticeTitle}>Need help?</Text><Text style={s.noticeText}>Visit the circulation desk or contact your department administrator for account support.</Text></View>
+        </View>
+      </View>
+    </View>
+    <View style={s.authSide}>
+      <View style={s.authCard}>
+        <Text style={s.eyebrow}>{mode === 'register' ? 'New member' : mode === 'forgot' ? 'Account help' : 'Member access'}</Text>
+        <Text style={s.authTitle}>{mode === 'register' ? 'Create account' : mode === 'forgot' ? 'Reset password' : 'Sign in'}</Text>
+        {mode === 'register' ? <>
+          <Text style={s.label}>Full name</Text><TextInput value={name} onChangeText={setName} placeholder="Your full name" style={s.input} />
+          <Text style={s.label}>Student ID</Text><TextInput value={studentId} onChangeText={setStudentId} placeholder="IT12345678" style={s.input} />
+        </> : null}
+        <Text style={s.label}>University email</Text><TextInput value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="you@university.edu" style={s.input} />
+        {mode !== 'forgot' ? <><Text style={s.label}>Password</Text><TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="At least 8 characters" style={s.input} /></> : null}
+        <Pressable disabled={busy} onPress={submit} style={s.primary}><Text style={s.primaryText}>{busy ? 'Please wait...' : mode === 'register' ? 'Create account' : mode === 'forgot' ? 'Request help' : 'Sign in'}</Text></Pressable>
+        <View style={s.authLinks}>
+          <Text onPress={() => setMode(mode === 'register' ? 'login' : 'register')} style={s.link}>{mode === 'register' ? 'Back to sign in' : 'Create account'}</Text>
+          <Text onPress={() => setMode('forgot')} style={s.link}>Forgot password?</Text>
+        </View>
+      </View>
+    </View>
+  </View>;
+}
+
 export default function WebApp({ busy, books, query, setQuery, results, reservations, user, email, password, setEmail, setPassword, authenticate, logout, reserveBook, cancelReservation, cancelAll }) {
   const [mode, setMode] = useState('login');
   const [section, setSection] = useState('dashboard');
@@ -88,7 +144,7 @@ export default function WebApp({ busy, books, query, setQuery, results, reservat
   const selectedBook = books.find(book => book.id === selected?.id) || selected || books[0];
   const nav = [['dashboard', 'Dashboard'], ['catalogue', 'Catalogue'], ['reservations', 'Reservations'], ['rooms', 'Reading rooms'], ['account', 'Account']];
 
-  if (!user) return <AuthPanel mode={mode} setMode={setMode} busy={busy} email={email} password={password} setEmail={setEmail} setPassword={setPassword} authenticate={authenticate} />;
+  if (!user) return <InstitutionalAuthPanel mode={mode} setMode={setMode} busy={busy} email={email} password={password} setEmail={setEmail} setPassword={setPassword} authenticate={authenticate} />;
 
   return <View style={s.shell}>
     <View style={s.sidebar}>
@@ -210,6 +266,20 @@ const s = StyleSheet.create({
   roomCard: { flex: 1, backgroundColor: '#F8FAFE', borderWidth: 1, borderColor: '#E2E8F3', borderRadius: 14, padding: 18 },
   roomName: { color: '#17213A', fontSize: 18, fontWeight: '900', marginBottom: 8 },
   authShell: { flex: 1, minHeight: '100vh', flexDirection: 'row', backgroundColor: '#EEF2F8' },
+  authHeroClean: { flex: 1.35, backgroundColor: '#17213A', padding: 56, justifyContent: 'center' },
+  heroContent: { maxWidth: 760 },
+  portalTop: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 56 },
+  portalLabel: { color: '#FFF', fontSize: 18, fontWeight: '900' },
+  portalSub: { color: '#AAB7D5', marginTop: 4, fontWeight: '700' },
+  serviceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 38 },
+  serviceCard: { width: '48%', minHeight: 142, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 14, padding: 18 },
+  serviceKicker: { color: '#F6C85F', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
+  serviceTitle: { color: '#FFF', fontSize: 18, fontWeight: '900', marginTop: 10 },
+  serviceText: { color: '#C8D3EF', lineHeight: 21, marginTop: 8 },
+  portalNotice: { flexDirection: 'row', gap: 18, marginTop: 24, padding: 18, backgroundColor: 'rgba(246,200,95,0.1)', borderWidth: 1, borderColor: 'rgba(246,200,95,0.24)', borderRadius: 14 },
+  noticeColumn: { flex: 1 },
+  noticeDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.16)' },
+  authSide: { width: 530, backgroundColor: '#EEF2F8', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 48 },
   authHero: { flex: 1.1, backgroundColor: '#17213A', padding: 56, justifyContent: 'center' },
   brandMark: { width: 72, height: 72, borderRadius: 18, backgroundColor: '#F6C85F', alignItems: 'center', justifyContent: 'center' },
   brandMarkText: { color: '#17213A', fontSize: 40, fontWeight: '900' },
