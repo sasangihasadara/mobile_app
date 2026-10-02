@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { api, setToken } from './services/api';
 import {
   Alert,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -24,6 +25,7 @@ import ShelfMapScreen from './screens/ShelfMapScreen';
 import ReserveBookScreen from './screens/ReserveBookScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import AppButton from './components/AppButton';
+import WebApp from './WebApp';
 
 const books = [
   { id: '1', title: 'Atomic Habits', author: 'James Clear', isbn: '978-0735211292', category: 'Self Development', available: true, copies: 3, color: '#FFD9A0' },
@@ -117,10 +119,11 @@ export default function App() {
     const data = await api('/books'); setCatalogue(data.books);
     setSelectedBook(data.books.find(item => item.id === book.id) || book); setScreen('bookDetails');
   });
-  const reserveBook = (pickup) => {
+  const reserveBook = (pickup, bookOverride) => {
     if (!user) { setScreen('login'); return; }
     run(async () => {
-      const data = await api('/reservations', 'POST', { bookId: selectedBook.id, ...pickup });
+      const book = bookOverride || selectedBook;
+      const data = await api('/reservations', 'POST', { bookId: book.id, ...pickup });
       setCatalogue(data.books); setReserved(data.reservations); setConfirmation(data.reservation);
       setScreen('confirmation');
     });
@@ -133,6 +136,8 @@ export default function App() {
     try { for (const book of reserved) await api('/reservations/' + book.reservationId, 'DELETE'); }
     finally { await refresh(); }
   });
+
+  if (Platform.OS === 'web') return <WebApp busy={busy} books={catalogue} query={query} setQuery={setQuery} results={results} reservations={reserved} user={user} email={email} password={password} setEmail={setEmail} setPassword={setPassword} authenticate={authenticate} logout={logout} refresh={refresh} reserveBook={reserveBook} cancelReservation={cancelReservation} cancelAll={cancelAll} />;
 
   if (screen === 'welcome') return <WelcomeScreen onStart={() => setScreen('login')} onPreview={() => setScreen('preview')} />;
   if (screen === 'preview') return <ScreenPreview onBack={() => setScreen('welcome')} onOpen={setScreen} />;
@@ -178,7 +183,7 @@ function ScreenPreview({ onBack, onOpen }) {
 function DetailRow({ label, value }) { return <View style={styles.detailRow}><Text style={styles.detailLabel}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>; }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F7F8FC' }, page: { padding: 20, paddingBottom: 44 }, welcomeSafe: { flex: 1, backgroundColor: '#273B7A' }, welcome: { flex: 1, padding: 28, justifyContent: 'center' },
+  safe: { flex: 1, backgroundColor: '#F7F8FC' }, page: { width: '100%', maxWidth: 620, alignSelf: 'center', padding: 20, paddingBottom: 44 }, welcomeSafe: { flex: 1, backgroundColor: '#273B7A' }, welcome: { flex: 1, padding: 28, justifyContent: 'center' },
   welcomeLogo: { width: 72, height: 72, borderRadius: 22, backgroundColor: '#F6C85F', justifyContent: 'center', alignItems: 'center', marginBottom: 26 }, welcomeLogoText: { fontSize: 38, fontWeight: '900', color: '#273B7A' },
   welcomeTitle: { color: '#FFF', fontSize: 38, fontWeight: '800' }, welcomeSubtitle: { color: '#DCE5FF', fontSize: 17, lineHeight: 25, marginTop: 10, marginBottom: 36 }, featureBox: { flexDirection: 'row', gap: 15, borderWidth: 1, borderColor: '#6C80BE', backgroundColor: '#344987', padding: 18, borderRadius: 18 }, featureIcon: { color: '#F6C85F', fontSize: 32 }, featureTitle: { color: '#FFF', fontSize: 17, fontWeight: '700' }, featureCopy: { color: '#DCE5FF', marginTop: 4 }, welcomeBottom: { marginTop: 'auto' }, welcomeFootnote: { color: '#BFCBF4', textAlign: 'center', marginTop: 16 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 }, logo: { width: 42, height: 42, borderRadius: 14, backgroundColor: '#304B9B', alignItems: 'center', justifyContent: 'center' }, logoText: { color: '#FFF', fontSize: 23, fontWeight: '900' }, headerText: { flex: 1, marginLeft: 12 }, headerTitle: { fontSize: 21, fontWeight: '800', color: '#1D2742' }, headerSubtitle: { color: '#69738D', marginTop: 2 }, avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#E5E9F8', alignItems: 'center', justifyContent: 'center' }, avatarText: { color: '#304B9B', fontSize: 12, fontWeight: '800' }, back: { width: 42, height: 42, borderRadius: 14, backgroundColor: '#E8ECF7', alignItems: 'center', justifyContent: 'center' }, backText: { fontSize: 35, lineHeight: 38, color: '#304B9B' },
