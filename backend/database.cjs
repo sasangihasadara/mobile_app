@@ -1,19 +1,17 @@
 const { MongoClient } = require('mongodb');
+const dns = require('node:dns');
 
-const seedBooks = [
-  { _id: '1', title: 'Atomic Habits', author: 'James Clear', isbn: '978-0735211292', category: 'Self Development', copies: 3, color: '#FFD9A0' },
-  { _id: '2', title: 'The Alchemist', author: 'Paulo Coelho', isbn: '978-0061122415', category: 'Fiction', copies: 1, color: '#CFE7FF' },
-  { _id: '3', title: 'Clean Code', author: 'Robert C. Martin', isbn: '978-0132350884', category: 'Computing', copies: 0, color: '#E1D7FF' },
-  { _id: '4', title: 'The Psychology of Money', author: 'Morgan Housel', isbn: '978-0857197689', category: 'Finance', copies: 2, color: '#CFF3DF' },
-];
+const seedBooks = require('../frontend/data/catalogue.json').map(({ id, available, ...book }) => ({ ...book, _id: id }));
 
 // Never expose the embedded reservations (including other users' IDs) in the catalogue.
 function publicBook(book) {
   return { id: book._id, title: book.title, author: book.author, isbn: book.isbn,
-    category: book.category, copies: book.copies, color: book.color, available: book.copies > 0 };
+    description: book.description, category: book.category, copies: book.copies, color: book.color, available: book.copies > 0 };
 }
 
 async function connectDatabase({ uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', dbName = process.env.MONGODB_DB || 'library_reserve' } = {}) {
+  const dnsServers = process.env.MONGODB_DNS_SERVERS;
+  if (dnsServers) dns.setServers(dnsServers.split(',').map(value => value.trim()).filter(Boolean));
   const client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 });
   try {
     await client.connect();
@@ -28,7 +26,11 @@ async function connectDatabase({ uri = process.env.MONGODB_URI || 'mongodb://127
       books.createIndex({ 'reservations.userId': 1 }),
     ]);
     for (const book of seedBooks) {
-      await books.updateOne({ _id: book._id }, { $setOnInsert: { ...book, reservations: [] } }, { upsert: true });
+      const { description, ...initialBook } = book;
+      await books.updateOne({ _id: book._id }, {
+        $set: { description },
+        $setOnInsert: { ...initialBook, reservations: [] },
+      }, { upsert: true });
     }
     return {
       close: () => client.close(),

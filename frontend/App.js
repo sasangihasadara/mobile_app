@@ -27,12 +27,7 @@ import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import AppButton from './components/AppButton';
 import WebApp from './WebApp';
 
-const books = [
-  { id: '1', title: 'Atomic Habits', author: 'James Clear', isbn: '978-0735211292', category: 'Self Development', available: true, copies: 3, color: '#FFD9A0' },
-  { id: '2', title: 'The Alchemist', author: 'Paulo Coelho', isbn: '978-0061122415', category: 'Fiction', available: true, copies: 1, color: '#CFE7FF' },
-  { id: '3', title: 'Clean Code', author: 'Robert C. Martin', isbn: '978-0132350884', category: 'Computing', available: false, copies: 0, color: '#E1D7FF' },
-  { id: '4', title: 'The Psychology of Money', author: 'Morgan Housel', isbn: '978-0857197689', category: 'Finance', available: true, copies: 2, color: '#CFF3DF' },
-];
+import books from './data/catalogue.json';
 
 const rooms = ['Quiet Study Room', 'Group Study Room', 'Digital Reading Room'];
 

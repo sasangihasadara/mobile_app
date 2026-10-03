@@ -21,6 +21,8 @@ Copy-Item backend/.env.example backend/.env
 
 For local MongoDB, start the MongoDB service and keep `MONGODB_URI=mongodb://127.0.0.1:27017`. For Atlas, set `MONGODB_URI` in `backend/.env` to your cluster connection string, create a database user with access to the `library_reserve` database, and allow your backend computer's IP in Atlas Network Access. URL-encode special characters in the password. Never put MongoDB credentials in `EXPO_PUBLIC_` variables or the mobile app. `backend/.env` is ignored by Git.
 
+If Atlas SRV lookups fail with `querySrv ECONNREFUSED`, you can set `MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8` in `backend/.env`. This overrides DNS resolution inside the backend Node.js process without changing Windows network settings. Use DNS servers permitted by your network.
+
 From this project directory, start the API in one terminal:
 
 ```powershell
