@@ -142,10 +142,10 @@ export default function App() {
   if (screen === 'home') return <HomeScreen user={user} busy={busy} onLogout={logout} catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={showReservations} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
   if (screen === 'search') return <SearchScreen query={query} setQuery={setQuery} results={results} onBack={() => setScreen('home')} onSearch={() => setScreen('results')} />;
   if (screen === 'results') return <ResultsScreen query={query} results={results} onBack={() => setScreen('search')} openBook={openBook} />;
-  if (screen === 'bookDetails') return <BookDetailsScreen book={selectedBook} onBack={() => setScreen('results')} onReserve={() => setScreen('reserve')} />;
-  if (screen === 'shelfMap') return <ShelfMapScreen book={selectedBook} onBack={() => setScreen('bookDetails')} />;
-  if (screen === 'reserve') return <ReserveBookScreen busy={busy} book={selectedBook} onBack={() => setScreen('bookDetails')} onConfirm={reserveBook} />;
-  if (screen === 'confirmation') return <ConfirmationScreen book={confirmation || selectedBook} onHome={() => setScreen('home')} onReservations={showReservations} />;
+  if (screen === 'bookDetails') return <ShelfMapScreen book={selectedBook} onBack={() => setScreen('results')} onReserve={() => setScreen('reserve')} onHome={() => setScreen('home')} onSearch={() => setScreen('search')} onHolds={showReservations} />;
+  if (screen === 'shelfMap') return <ShelfMapScreen book={selectedBook} onBack={() => setScreen('home')} onReserve={() => setScreen('reserve')} onHome={() => setScreen('home')} onSearch={() => setScreen('search')} onHolds={showReservations} />;
+  if (screen === 'reserve') return <ReserveBookScreen busy={busy} book={selectedBook} onBack={() => setScreen('bookDetails')} onConfirm={reserveBook} onHome={() => setScreen('home')} onSearch={() => setScreen('search')} onHolds={showReservations} />;
+  if (screen === 'confirmation') return <ConfirmationScreen onSearch={() => setScreen('search')} book={confirmation || selectedBook} onHome={() => setScreen('home')} onReservations={showReservations} />;
   if (screen === 'reservations') return <ReservationsScreen busy={busy} onCancelAll={cancelAll} items={reserved} onBack={() => setScreen('home')} onSearch={() => setScreen('search')} onCancel={cancelReservation} />;
   return <HomeScreen catalogue={catalogue} onSearch={() => setScreen('search')} onReservations={() => setScreen('reservations')} onRoom={() => setScreen('shelfMap')} openBook={openBook} />;
 }
