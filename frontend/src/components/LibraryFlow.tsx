@@ -1,0 +1,259 @@
+import type { Book as BookModel, Action } from '../types/library';
+import React from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, StatusBar, Platform } from 'react-native';
+export function Button({
+  title,
+  onPress,
+  secondary,
+  disabled
+}: {
+  title: string;
+  onPress: Action;
+  secondary?: boolean;
+  disabled?: boolean;
+}) {
+  return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({
+    pressed
+  }) => [ui.button, secondary && ui.secondary, (disabled || pressed) && {
+    opacity: 0.5
+  }]}><Text style={[ui.buttonText, secondary && {
+      color: '#2563EB'
+    }]}>{title}</Text></Pressable>;
+}
+export function Badge({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return <View style={ui.badge}><Text style={ui.badgeText}>{children}</Text></View>;
+}
+export function Label({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return <Text style={ui.label}>{children}</Text>;
+}
+export function Row({
+  label,
+  value
+}: {
+  label: string;
+  value?: string;
+}) {
+  return <View style={ui.row}><Text style={ui.muted}>{label}</Text><Text style={ui.value}>{value || 'Not recorded'}</Text></View>;
+}
+export function Book({
+  book
+}: {
+  book: BookModel;
+}) {
+  return <View style={ui.book}><View style={[ui.cover, {
+      backgroundColor: book.color || '#DBEAFE'
+    }]}><Text style={ui.initial}>{book.title?.[0]}</Text></View><View style={{
+      flex: 1
+    }}><Text style={ui.title}>{book.title}</Text><Text style={ui.muted}>{book.author}</Text><Text style={ui.meta}>{book.category}</Text></View></View>;
+}
+export function Frame({
+  title,
+  onBack,
+  children,
+  active = 'Search',
+  onHome,
+  onSearch,
+  onHolds
+}: {
+  title: string;
+  onBack: Action;
+  children: React.ReactNode;
+  active?: string;
+  onHome?: Action;
+  onSearch?: Action;
+  onHolds?: Action;
+}) {
+  return <View style={ui.safe}><StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" /><View style={ui.header}><Pressable accessibilityRole="button" onPress={onBack} style={{
+        paddingVertical: 12
+      }}><Text style={ui.back}>{'\u2190 '}{title}</Text></Pressable><Text style={ui.wordmark}>LIBRA / RESERVE</Text></View><ScrollView contentContainerStyle={ui.page}>{children}</ScrollView><View style={ui.nav}>{([['Home', '\u2302', onHome], ['Search', '\u2315', onSearch], ['Holds', '\u25A4', onHolds]] as [string, string, Action | undefined][]).map(([name, icon, action]) => <Pressable key={name} accessibilityRole="button" accessibilityState={{
+        selected: active === name
+      }} disabled={!action} onPress={action} style={ui.navItem}><Text style={[ui.navIcon, active === name && ui.blue]}>{icon}</Text><Text style={[ui.navText, active === name && ui.blue]}>{name}</Text></Pressable>)}</View></View>;
+}
+export const ui = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 48
+  },
+  header: {
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  back: {
+    color: '#2563EB',
+    fontSize: 12,
+    fontWeight: '600'
+  },
+  wordmark: {
+    fontSize: 8,
+    letterSpacing: 1,
+    color: '#64748B'
+  },
+  page: {
+    padding: 18,
+    paddingBottom: 30,
+    width: '100%',
+    maxWidth: 620,
+    alignSelf: 'center'
+  },
+  nav: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingTop: 8,
+    paddingBottom: 24,
+    backgroundColor: '#FFF'
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    minHeight: 44
+  },
+  navIcon: {
+    fontSize: 22,
+    color: '#94A3B8'
+  },
+  navText: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 3
+  },
+  blue: {
+    color: '#2563EB'
+  },
+  book: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 18,
+    alignItems: 'center'
+  },
+  cover: {
+    width: 52,
+    height: 72,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  initial: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1E3A8A'
+  },
+  title: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '700',
+    color: '#17233B'
+  },
+  muted: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 19
+  },
+  meta: {
+    fontSize: 10,
+    color: '#2563EB',
+    marginTop: 5
+  },
+  label: {
+    fontSize: 10,
+    color: '#6881A4',
+    letterSpacing: 1,
+    marginTop: 22,
+    marginBottom: 10,
+    fontWeight: '600'
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: '#DCE5F1',
+    backgroundColor: '#F8FAFD',
+    borderRadius: 5,
+    padding: 14,
+    marginBottom: 12
+  },
+  body: {
+    fontSize: 13,
+    lineHeight: 21,
+    color: '#475569'
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
+    paddingVertical: 8
+  },
+  value: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 12,
+    color: '#17233B',
+    fontWeight: '600'
+  },
+  button: {
+    minHeight: 46,
+    backgroundColor: '#2563EB',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
+    marginTop: 12
+  },
+  buttonText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 12,
+    textAlign: 'center'
+  },
+  secondary: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#CAD8EC'
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    borderRadius: 3,
+    backgroundColor: '#DDF9ED',
+    paddingHorizontal: 8,
+    paddingVertical: 5
+  },
+  badgeText: {
+    fontSize: 9,
+    color: '#047857',
+    fontWeight: '700',
+    letterSpacing: .5
+  },
+  heading: {
+    fontSize: 23,
+    fontWeight: '700',
+    color: '#17233B',
+    marginBottom: 8
+  },
+  ticket: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#A8BCE1',
+    padding: 22,
+    alignItems: 'center',
+    borderRadius: 5,
+    marginVertical: 14
+  },
+  code: {
+    fontSize: 23,
+    fontWeight: '800',
+    letterSpacing: 2,
+    color: '#1E3A8A',
+    marginVertical: 10
+  }
+});

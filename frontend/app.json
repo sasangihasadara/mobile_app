@@ -5,8 +5,18 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "web": { "bundler": "metro" },
-    "android": { "package": "com.library.reserve" },
-    "ios": { "bundleIdentifier": "com.library.reserve" }
+    "web": {
+      "bundler": "metro"
+    },
+    "android": {
+      "package": "com.library.reserve"
+    },
+    "ios": {
+      "bundleIdentifier": "com.library.reserve"
+    },
+    "scheme": "librareserve",
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

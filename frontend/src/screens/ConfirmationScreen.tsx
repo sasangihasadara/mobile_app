@@ -1,0 +1,31 @@
+import type { ScreenProps } from '../types/library';
+import React from 'react';
+import { View, Text, Share, Alert } from 'react-native';
+import { Frame, Book, Label, Badge, Row, Button, ui } from '../components/LibraryFlow';
+export default function ConfirmationScreen({
+  book,
+  onHome,
+  onReservations,
+  onSearch
+}: Pick<ScreenProps, 'book' | 'onHome' | 'onReservations' | 'onSearch'>) {
+  const confirmed = !!book.reservationId;
+  return <Frame title="Back to home" onBack={onHome} onHome={onHome} onSearch={onSearch} onHolds={onReservations}><View style={{
+      alignItems: 'center',
+      paddingVertical: 25,
+      gap: 12
+    }}><View style={{
+        width: 62,
+        height: 62,
+        borderRadius: 31,
+        backgroundColor: '#D1FAE5',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}><Text style={{
+          fontSize: 32,
+          color: '#059669'
+        }}>{confirmed ? '✓' : 'i'}</Text></View><Text style={ui.title}>{confirmed ? 'HOLD REQUEST PLACED' : 'RESERVATION PREVIEW'}</Text><Text style={ui.muted}>{confirmed ? 'Your reservation has been saved.' : 'Reserve a book to receive your pickup code.'}</Text></View><Label>Reserved volume</Label><View style={ui.card}><Book book={book} />{confirmed ? <Badge>CONFIRMED</Badge> : null}</View><Label>Collection instructions</Label><View style={[ui.card, {
+      backgroundColor: '#EFF6FF'
+    }]}><Row label="Pickup location" value="Main Library desk" /><Row label="Pickup date" value={book.pickupDate} /><Row label="Pickup window" value={book.pickupWindow} /><Text style={ui.body}>Show your pickup code and student ID at the desk during your selected window.</Text></View><View style={ui.ticket}><Text style={ui.muted}>YOUR PICKUP PASS</Text><Text selectable style={ui.code}>{book.pickupCode || 'Not reserved'}</Text><Text style={ui.muted}>Keep this code for collection.</Text></View>{confirmed ? <Button secondary title="SHARE PICKUP DETAILS" onPress={() => Share.share({
+      message: book.title + '\nPickup code: ' + book.pickupCode + '\nMain Library desk\n' + book.pickupDate + ' / ' + book.pickupWindow
+    }).catch(() => Alert.alert('Could not share', 'Please try again.'))} /> : null}<Button title="VIEW MY RESERVATIONS →" onPress={onReservations} /></Frame>;
+}
