@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
 const { MongoClient } = require('mongodb');
-const { createApp } = require('./server.cjs');
+const { createApp } = require('./server.js');
 
 test('accounts, inventory, ownership, concurrent reservations and persistence', async () => {
   // Always use a new, isolated database, never the application's database.

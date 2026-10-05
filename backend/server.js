@@ -1,5 +1,5 @@
 const http = require('node:http');
-const { connectDatabase } = require('./database.cjs');
+const { connectDatabase } = require('./database.js');
 const { randomBytes, randomUUID, scryptSync, timingSafeEqual, createHash } = require('node:crypto');
 
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -63,7 +63,7 @@ async function createApp(options = {}) {
       if(req.method==='POST' && route==='/api/auth/logout') {await db.removeSession(digest(token));return send(200,{ok:true});}
       if(req.method==='GET' && route==='/api/reservations') return send(200,{reservations:await reservations(auth.userId)});
       if(req.method==='POST' && route==='/api/reservations') {
-        if(typeof body.bookId!=='string'||typeof body.pickupDate!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(body.pickupDate||'')||!['9-11 AM','12-2 PM','4-6 PM'].includes(body.pickupWindow)) fail(400,'Choose a valid pickup date and window.');
+        if(typeof body.bookId!=='string'||typeof body.pickupDate!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(body.pickupDate||'')||!['9-11 AM','12-2 PM','4-6 PM'].includes(body.pickupWindow)) fail(400,'Choose a valid pickup date and window.');
         const date=new Date(body.pickupDate+'T00:00:00Z');
         const today=new Date().toISOString().slice(0,10);
         if(!Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==body.pickupDate||body.pickupDate<today||date.getTime()>Date.now()+8*86400000) fail(400,'Pickup must be within the next seven days.');
